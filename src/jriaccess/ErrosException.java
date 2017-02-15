@@ -11,5 +11,7 @@ package jriaccess;
  */
 public enum ErrosException {
     INDEFINIDO,
-    VARIAVEL_NAO_CONFIGURADA
+    VARIAVEL_NAO_CONFIGURADA,
+    TIME_ESGOTADO,
+    THREAD_SLEEP
 }
