@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.rosuda.JRI.RMainLoopCallbacks;
 import org.rosuda.JRI.Rengine;
 
@@ -65,6 +67,7 @@ class TextConsole implements RMainLoopCallbacks {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             String s = br.readLine();
             send(ENUM_CONSOLE.CONSOLE_ECHO, prompt + " " + s);
+            Rjava.inUse = true;
             return (s == null || s.length() == 0) ? s : s + "\n";
         } catch (IOException e) {
             send(ENUM_CONSOLE.CONSOLE_ERROR, "jriReadConsole exception: " + e.getMessage());
@@ -134,6 +137,8 @@ class TextConsole implements RMainLoopCallbacks {
 
 public class Rjava {
 
+    public static boolean inUse = false;
+
     public static void init() {
         // just making sure we have the right version of everything
         if (!Rengine.versionCheck()) {
@@ -156,6 +161,21 @@ public class Rjava {
         if (true) {
             TextConsole.send(ENUM_CONSOLE.CONSOLE_BUSY, "Now the console is yours ... have fun");
             re.startMainLoop();
+            int i = 0;
+            while (i++ < 10) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    System.err.println("nao foi possive aguardar tempo.");
+                    System.exit(-1 * ErrosException.THREAD_SLEEP.ordinal());
+                }
+            }
+            if (!inUse) {
+                re.end();
+                System.err.println("o sistema nao recebeu dados em 10 segundos.");
+                System.exit(-1 * ErrosException.TIME_ESGOTADO.ordinal());
+            }
+
         } else {
             re.end();
             TextConsole.send(ENUM_CONSOLE.CONSOLE_ERROR, "end...");
